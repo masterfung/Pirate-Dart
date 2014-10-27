@@ -4,9 +4,19 @@
 
 import 'dart:html';
 
+import 'dart:math' show Random;
+
 ButtonElement genButton;
 
-void  main() {
+void setBadgeName(String newName) {
+  querySelector('#badgeName').text = newName;
+}
+
+void generateBadge(Event e) {
+  setBadgeName('@masterfung');
+}
+
+void main() {
   querySelector('#inputName').onInput.listen(updateBadge);
   genButton = querySelector('#generateButton');
   genButton.onClick.listen(generateBadge);
@@ -14,21 +24,12 @@ void  main() {
 
 void updateBadge(Event e) {
   String inputName = (e.target as InputElement).value;
-  
   setBadgeName(inputName);
   if (inputName.trim().isEmpty) {
     genButton..disabled = false
-             ..text = 'Aye! Gimme a name!';
+             ..text = 'Ahoy mate! Gimme A Name!';
   } else {
     genButton..disabled = true
-             ..text = 'Arrr! Write yer name!';
+             ..text = ':) ! Write Yee Name!';
   }
-}
-
-void generateBadge(Event e) {
-  setBadgeName('Anne Bonney');
-}
-
-void setBadgeName(String newName) {
-  querySelector('#badgeName').text = newName;
 }

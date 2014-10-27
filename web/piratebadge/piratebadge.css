@@ -16,11 +16,11 @@ h1, p {
   float: left;
 }
 .badge {
-  border: 2px solid brown;
+  border: 2px solid white;
   border-radius: 1em;
-  background: red;
+  background: purple;
   font-size: 14pt;
-  width: 14em;
+  width: 20em;
   height: 7em;
   text-align: center;
   float: left;

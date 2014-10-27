@@ -8,12 +8,12 @@ import 'dart:math' show Random;
 
 ButtonElement genButton;
 
-void setBadgeName(String newName) {
-  querySelector('#badgeName').text = newName;
+void setBadgeName(PirateName newName) {
+  querySelector('#badgeName').text = newName.pirateName;
 }
 
 void generateBadge(Event e) {
-  setBadgeName('@masterfung');
+  setBadgeName(new PirateName());
 }
 
 void main() {
@@ -24,7 +24,8 @@ void main() {
 
 void updateBadge(Event e) {
   String inputName = (e.target as InputElement).value;
-  setBadgeName(inputName);
+  
+  setBadgeName(new PirateName (firstName: inputName));
   if (inputName.trim().isEmpty) {
     genButton..disabled = false
              ..text = 'Ahoy mate! Gimme A Name!';
@@ -32,4 +33,36 @@ void updateBadge(Event e) {
     genButton..disabled = true
              ..text = ':) ! Write Yee Name!';
   }
+}
+
+
+class PirateName {
+  static final Random indexGen = new Random();
+  String _firstName;
+  String _appellation;
+  
+  static final List names = [
+                             'Jackie', 'Henry', 'Sarah', 'Harry', 'Jim', 'Kerry', 'Aryn',
+                             'Jorge', 'Kim', 'Leslie', 'Thacther'
+                             ];
+  static final List appellations = [
+                                    'Brave', 'Strong', 'Cunning', 'Strategizer', 'Wrestler',
+                                    'Strange', 'Wise', 'Decider', 'Programmer', 'Just'
+                                    ];
+  
+  PirateName({String firstName, String appellation}) {
+    if (firstName == null) {
+      _firstName = names[indexGen.nextInt(names.length)];
+    } else {
+      _firstName = firstName;
+    }
+    if (appellation == null) {
+      _appellation = appellations[indexGen.nextInt(appellations.length)];
+    } else {
+      _appellation = appellation;
+    }
+  }
+  
+  String get pirateName =>
+      _firstName.isEmpty ? '' : '$_firstName the $_appellation';
 }

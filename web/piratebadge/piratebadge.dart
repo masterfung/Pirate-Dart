@@ -6,21 +6,58 @@ import 'dart:html';
 
 import 'dart:math' show Random;
 
+import 'dart:convert' show JSON;
+
+import 'dart:async' show Future;
+
+final String TREASURE_KEY = 'pirateName';
+
 ButtonElement genButton;
+SpanElement badgeNameElement;
+
+void main() {
+  InputElement inputField = querySelector('#inputName');
+  inputField.onInput.listen(updateBadge);
+  genButton = querySelector('#generateButton');
+  genButton.onClick.listen(generateBadge);
+    
+  badgeNameElement = querySelector('#badgeName');
+
+  PirateName.readyThePirates()
+    .then((_) {
+      //on success
+      inputField.disabled = false; //enable
+      genButton.disabled = false;  //enable
+      setBadgeName(getBadgeNameFromStorage());
+    })
+    .catchError((arrr) {
+      print('Error initializing pirate names: $arrr');
+      badgeNameElement.text = 'Arrr! No names.';
+    });
+
+}
 
 void setBadgeName(PirateName newName) {
-  querySelector('#badgeName').text = newName.pirateName;
+  if (newName == null) {
+    return;
+  }
+  badgeNameElement.text = newName.pirateName;
+  window.localStorage[TREASURE_KEY] = newName.jsonString;
+}
+
+PirateName getBadgeNameFromStorage() {
+  String storedName = window.localStorage[TREASURE_KEY];
+  if (storedName != null) {
+    return new PirateName.fromJSON(storedName);
+  } else {
+    return null;
+  }
 }
 
 void generateBadge(Event e) {
   setBadgeName(new PirateName());
 }
 
-void main() {
-  querySelector('#inputName').onInput.listen(updateBadge);
-  genButton = querySelector('#generateButton');
-  genButton.onClick.listen(generateBadge);
-}
 
 void updateBadge(Event e) {
   String inputName = (e.target as InputElement).value;
@@ -33,6 +70,7 @@ void updateBadge(Event e) {
     genButton..disabled = true
              ..text = ':) ! Write Yee Name!';
   }
+
 }
 
 
@@ -41,14 +79,20 @@ class PirateName {
   String _firstName;
   String _appellation;
   
-  static final List names = [
-                             'Jackie', 'Henry', 'Sarah', 'Harry', 'Jim', 'Kerry', 'Aryn',
-                             'Jorge', 'Kim', 'Leslie', 'Thacther'
-                             ];
-  static final List appellations = [
-                                    'Brave', 'Strong', 'Cunning', 'Strategizer', 'Wrestler',
-                                    'Strange', 'Wise', 'Decider', 'Programmer', 'Just'
-                                    ];
+  static List<String> names = [];
+  static List<String> appellations = [];
+
+  static Future readyThePirates() {
+    var path = 'piratenames.json';
+    return HttpRequest.getString(path)
+      .then(_parsePirateNamesFromJSON);
+  }
+
+  static _parsePirateNamesFromJSON(String jsonString) {
+    Map pirateNames = JSON.decode(jsonString);
+    names = pirateNames['names'];
+    appellations = pirateNames['appellations'];
+  }
   
   PirateName({String firstName, String appellation}) {
     if (firstName == null) {
@@ -62,6 +106,14 @@ class PirateName {
       _appellation = appellation;
     }
   }
+  
+  PirateName.fromJSON(String jsonString) {
+      Map storedName = JSON.decode(jsonString);
+      _firstName = storedName['f'];
+      _appellation = storedName['a'];
+  }
+  
+  String get jsonString => JSON.encode({"f": _firstName, "a": _appellation});
   
   String get pirateName =>
       _firstName.isEmpty ? '' : '$_firstName the $_appellation';
